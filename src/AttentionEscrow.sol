@@ -75,7 +75,7 @@ contract AttentionEscrow {
     }
 
     // Complete the order and transfer funds to the recipient (recipient details stored off-chain)
-    function completeOrder(string memory _orderId, address _recipient) external orderExists(_orderId) inState(_orderId, State.Approved) notExpired(_orderId) {
+    function completeOrder(string memory _orderId, address _recipient) external orderExists(_orderId) inState(_orderId, State.Approved) onlyVerifier notExpired(_orderId) {
         Order storage order = orders[_orderId];
         order.state = State.Completed;
 
@@ -86,7 +86,7 @@ contract AttentionEscrow {
     }
 
     // Refund the order if it has expired and hasn't been completed
-    function refundOrder(string memory _orderId, address _depositor) external orderExists(_orderId) inState(_orderId, State.Created) {
+    function refundOrder(string memory _orderId, address _depositor) external orderExists(_orderId) onlyVerifier inState(_orderId, State.Created) {
         require(block.timestamp > orders[_orderId].expiry, "Order has not expired yet");
 
         Order storage order = orders[_orderId];
