@@ -98,36 +98,21 @@ contract AttentionEscrow {
         emit OrderRefunded(_orderId);
     }
 
-    // Batch withdrawal of multiple orders at once
-    function batchWithdrawOrders(string[] memory _orderIds, address[] memory _recipientsOrDepositors) external {
-        require(_orderIds.length == _recipientsOrDepositors.length, "Order IDs and recipients/depositors length mismatch");
-
-        for (uint256 i = 0; i < _orderIds.length; i++) {
-            string memory orderId = _orderIds[i];
-            address recipientOrDepositor = _recipientsOrDepositors[i];
-
-            Order storage order = orders[orderId];
-
-            // If the order is approved and not completed, transfer to recipient
-            if (order.state == State.Approved && block.timestamp <= order.expiry) {
-                order.state = State.Completed;
-                (bool sent, ) = recipientOrDepositor.call{value: order.amount}("");
-                require(sent, "Failed to send funds to recipient");
-                emit OrderCompleted(orderId);
-
-            // If the order is expired or rejected, refund to depositor
-            } else if (order.state == State.Created || order.state == State.Rejected) {
-                require(block.timestamp > order.expiry || order.state == State.Rejected, "Order is not expired or rejected");
-                order.state = State.Refunded;
-                (bool sent, ) = recipientOrDepositor.call{value: order.amount}("");
-                require(sent, "Failed to refund funds to depositor");
-                emit OrderRefunded(orderId);
-            }
-        }
-    }
-
-    // Get order state (optional helper function)
+    // Get order state
     function getOrderState(string memory _orderId) external view orderExists(_orderId) returns (State) {
         return orders[_orderId].state;
+    }
+
+    // Get the state of multiple orders in a batch
+    function getOrderStates(string[] memory _orderIds) external view returns (State[] memory) {
+        State[] memory states = new State[](_orderIds.length);
+        
+        for (uint256 i = 0; i < _orderIds.length; i++) {
+            string memory orderId = _orderIds[i];
+            require(orders[orderId].amount > 0, "One of the orders does not exist");
+            states[i] = orders[orderId].state;
+        }
+        
+        return states;
     }
 }
