@@ -7,13 +7,12 @@ import "../src/AttentionEscrow.sol";  // Ensure the correct path to the contract
 contract DeployAttentionEscrow is Script {
     function run() external {
         // Replace with the verifier's address (could be your own or some other address)
-        address verifier = vm.envAddress("ADD");
 
         // Start broadcasting transactions using your private key
         vm.startBroadcast();
 
         // Deploy the AttentionEscrow contract with the verifier address
-        AttentionEscrow escrow = new AttentionEscrow(verifier);
+        AttentionEscrow escrow = new AttentionEscrow();
 
         // Stop broadcasting transactions
         vm.stopBroadcast();

@@ -36,8 +36,6 @@ contract AttentionEscrow {
         _;
     }
 
-    constructor() {}
-
     // Create a new order with the orderId, state is set to Created
     function createOrder(string memory _orderId, uint256 _expiry, address _recipient) external payable {
         require(bytes(_orderId).length > 0, "Order ID cannot be empty");
